@@ -1,74 +1,72 @@
+use super::file_name_decomposer::DecomposedFileName;
 use crate::errors::helper_errors::LeetCodeHelperError;
 use std::fs;
 
-pub struct FileAllocator;
-
-impl FileAllocator {
-    pub fn new() -> Self {
-        FileAllocator {}
-    }
-
-    /// create appropriate directory
-    fn create_directory(&self, file_name: DecomposedFileName) -> Result<(), std::io::Error> {
-        let dir_name = Self::file_dir(file_name);
-        fs::create_dir_all(path)
+trait FileHandler {
+    /// create directory
+    fn create_directory(&self, file_name: &DecomposedFileName) -> Result<(), LeetCodeHelperError> {
+        let dir_name = Self::file_dir(file_name)?;
+        if let Err(e) = fs::create_dir_all(dir_name) {
+            return Err(LeetCodeHelperError::IoError(e));
+        }
         Ok(())
     }
 
-    /// move the file from the project top to appropriate directory that is defined in the "file_dir"
-    /// function.
-    fn move_file() {}
+    /// move to appropriate folder
+    fn move_file(&self, file_name: &DecomposedFileName) -> Result<(), LeetCodeHelperError> {
+        let dir_name = Self::file_dir(file_name)?;
+        if let Err(e) = fs::rename(
+            file_name.file_name(),
+            format!("{}/{}", dir_name, file_name.file_name()),
+        ) {
+            return Err(LeetCodeHelperError::IoError(e));
+        }
+        Ok(())
+    }
 
     /// determine file directory
-    fn file_dir(file_name: DecomposedFileName) -> String {
-        match file_name.extension.as_str() {
-            "rs" => format!(
-                "{}/src/bin/{}",
-                file_name.extension,
-                file_name.remove_extension()
-            ),
-            _ => format!("{}/{}", file_name.extension, file_name.remove_extension()),
-        }
-    }
+    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError>;
 }
 
-/// decompose the file name to problem number, problem name, extension.
-/// expected file name "problem-number.problem-name.extension"
-struct DecomposedFileName {
-    problem_number: String,
-    problem_name: String,
-    extension: String,
-}
+/// general language
+struct GeneralAllocator;
 
-impl DecomposedFileName {
-    pub fn new(file_name: &str) -> Result<Self, LeetCodeHelperError> {
-        let mut splited_name = file_name.split(".").collect::<Vec<&str>>();
-        let length = splited_name.len();
-
-        if length < 3 {
-            return Err(LeetCodeHelperError::ProblemFileNameLengthError(length));
+impl FileHandler for GeneralAllocator {
+    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError> {
+        let require_extension = "rs";
+        if file_name.extension() != require_extension {
+            return Err(LeetCodeHelperError::ExtensionMismatchError(
+                require_extension.to_string(),
+                file_name.extension().to_string(),
+            ));
         };
 
-        let problem_number = splited_name.first().unwrap().to_string();
-        let extension = splited_name.last().unwrap().to_string();
-        let problem_name = splited_name[1..splited_name.len() - 1].join(".");
-
-        Ok(DecomposedFileName {
-            problem_number,
-            problem_name,
-            extension,
-        })
+        Ok(format!(
+            "{}/src/{}",
+            file_name.extension(),
+            file_name.remove_extension()
+        ))
     }
+}
 
-    pub(crate) fn remove_extension(&self) -> String {
-        format!("{}.{}", self.problem_number, self.problem_name)
-    }
+/// for Rust
+struct RustAllocator;
 
-    pub(crate) fn file_name(&self) -> String {
-        format!(
-            "{}.{}.{}",
-            self.problem_number, self.problem_number, self.extension
-        )
+impl FileHandler for RustAllocator {
+    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError> {
+        let require_extension = "rs";
+        if file_name.extension() != require_extension {
+            return Err(LeetCodeHelperError::ExtensionMismatchError(
+                require_extension.to_string(),
+                file_name.extension().to_string(),
+            ));
+        };
+
+        Ok(format!(
+            "{}/src/bin/{}",
+            file_name.extension(),
+            file_name.remove_extension()
+        ))
     }
 }
 
@@ -76,32 +74,6 @@ impl DecomposedFileName {
 mod test {
     use super::*;
 
-    #[test]
-    fn decompose_file_name_new_test() {
-        let decomposed_or_error = DecomposedFileName::new("1.sum.val.rs");
-
-        assert!(decomposed_or_error.is_ok());
-
-        let decomposed = decomposed_or_error.unwrap();
-
-        assert_eq!(decomposed.problem_number, "1".to_string());
-        assert_eq!(decomposed.problem_name, "sum.val".to_string());
-        assert_eq!(decomposed.extension, "rs".to_string());
-    }
-
-    #[test]
-    fn decompose_file_name_incorrect_file_name() {
-        let decompose_or_error = DecomposedFileName::new("1.sum");
-
-        assert!(decompose_or_error.is_err());
-    }
-
-    #[test]
-    fn decompose_file_convination_test() {
-        let decomposed = DecomposedFileName::new("1.sum.val.rs").unwrap();
-
-        assert_eq!(decomposed.remove_extension(), "1.sum.val");
-    }
     //
     // #[test]
     // fn file_dir_test() {
