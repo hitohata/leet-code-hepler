@@ -37,7 +37,7 @@ impl DecomposedFileName {
     }
 
     pub(crate) fn extension(&self) -> String {
-        self.extension
+        self.extension.to_owned()
     }
 
     pub(crate) fn file_name(&self) -> String {

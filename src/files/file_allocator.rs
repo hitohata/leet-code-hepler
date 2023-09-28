@@ -2,10 +2,25 @@ use super::file_name_decomposer::DecomposedFileName;
 use crate::errors::helper_errors::LeetCodeHelperError;
 use std::fs;
 
-trait FileHandler {
+struct FileAllocator<'a> {
+    language: String,
+    decomposed_file_name: &'a DecomposedFileName,
+    file_handler: Box<dyn LanguageHandler>,
+}
+
+impl <'a> FileAllocator<'a> {
+    fn new(language: String, decomposed_file_name: &'a DecomposedFileName) -> Self {
+        let file_handler = language_handler(decomposed_file_name);
+        Self {
+            language,
+            decomposed_file_name,
+            file_handler
+        }
+    }
+
     /// create directory
-    fn create_directory(&self, file_name: &DecomposedFileName) -> Result<(), LeetCodeHelperError> {
-        let dir_name = Self::file_dir(file_name)?;
+    fn create_directory(&self) -> Result<(), LeetCodeHelperError> {
+        let dir_name = self.file_handler.file_dir(&self.language, &self.decomposed_file_name);
         if let Err(e) = fs::create_dir_all(dir_name) {
             return Err(LeetCodeHelperError::IoError(e));
         }
@@ -13,75 +28,62 @@ trait FileHandler {
     }
 
     /// move to appropriate folder
-    fn move_file(&self, file_name: &DecomposedFileName) -> Result<(), LeetCodeHelperError> {
-        let dir_name = Self::file_dir(file_name)?;
+    fn move_file(&self) -> Result<(), LeetCodeHelperError> {
+
+        let dir_name = self.file_handler.file_dir(&self.language, &self.decomposed_file_name);
         if let Err(e) = fs::rename(
-            file_name.file_name(),
-            format!("{}/{}", dir_name, file_name.file_name()),
+            self.decomposed_file_name.file_name().to_string(),
+            format!("{}/{}", dir_name, self.decomposed_file_name.file_name().to_string()),
         ) {
             return Err(LeetCodeHelperError::IoError(e));
         }
         Ok(())
     }
 
+}
+
+/// generate a language handler
+pub fn language_handler(decomposed_file_name: &DecomposedFileName) -> Box<dyn LanguageHandler> {
+    let a = match decomposed_file_name.extension() {
+        String::from("rs") => Box::new(RustHandler),
+        _ => Box::new(GeneralHandler)
+    };
+
+    a
+}
+
+trait LanguageHandler {
     /// determine file directory
-    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError>;
+    fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String;
 }
 
 /// general language
-struct GeneralAllocator;
+struct GeneralHandler;
+/// for Rust
+struct RustHandler;
 
-impl FileHandler for GeneralAllocator {
-    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError> {
-        let require_extension = "rs";
-        if file_name.extension() != require_extension {
-            return Err(LeetCodeHelperError::ExtensionMismatchError(
-                require_extension.to_string(),
-                file_name.extension().to_string(),
-            ));
-        };
 
-        Ok(format!(
+impl LanguageHandler for GeneralHandler {
+    fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String {
+        format!(
             "{}/src/{}",
-            file_name.extension(),
-            file_name.remove_extension()
-        ))
+            file_name.extension().to_string(),
+            file_name.remove_extension().to_string()
+        )
     }
 }
 
-/// for Rust
-struct RustAllocator;
-
-impl FileHandler for RustAllocator {
-    fn file_dir(file_name: &DecomposedFileName) -> Result<String, LeetCodeHelperError> {
-        let require_extension = "rs";
-        if file_name.extension() != require_extension {
-            return Err(LeetCodeHelperError::ExtensionMismatchError(
-                require_extension.to_string(),
-                file_name.extension().to_string(),
-            ));
-        };
-
-        Ok(format!(
+impl LanguageHandler for RustHandler {
+    fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String{
+        format!(
             "{}/src/bin/{}",
-            file_name.extension(),
-            file_name.remove_extension()
-        ))
+            file_name.extension().to_string(),
+            file_name.remove_extension().to_string()
+        )
     }
 }
 
 #[cfg(test)]
 mod test {
     use super::*;
-
-    //
-    // #[test]
-    // fn file_dir_test() {
-    //     let file_allicator = FileAllocator::new();
-    //
-    //     assert_eq!(
-    //         FileAllocator::file_dir("1.sum.ts", "typescript"),
-    //         "typescript/1.sum"
-    //     );
-    // }
 }
