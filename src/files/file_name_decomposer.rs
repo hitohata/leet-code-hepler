@@ -4,7 +4,7 @@ use crate::errors::helper_errors::LeetCodeHelperError;
 
 /// decompose the file name to problem number, problem name, extension.
 /// expected file name "problem-number.problem-name.extension"
-struct DecomposedFileName {
+pub struct DecomposedFileName {
     problem_number: String,
     problem_name: String,
     extension: String,
@@ -34,6 +34,10 @@ impl DecomposedFileName {
 
     pub(crate) fn remove_extension(&self) -> String {
         format!("{}.{}", self.problem_number, self.problem_name)
+    }
+
+    pub(crate) fn extension(&self) -> String {
+        self.extension
     }
 
     pub(crate) fn file_name(&self) -> String {
