@@ -8,19 +8,21 @@ struct FileAllocator<'a> {
     file_handler: Box<dyn LanguageHandler>,
 }
 
-impl <'a> FileAllocator<'a> {
+impl<'a> FileAllocator<'a> {
     fn new(language: String, decomposed_file_name: &'a DecomposedFileName) -> Self {
         let file_handler = language_handler(decomposed_file_name);
         Self {
             language,
             decomposed_file_name,
-            file_handler
+            file_handler,
         }
     }
 
     /// create directory
     fn create_directory(&self) -> Result<(), LeetCodeHelperError> {
-        let dir_name = self.file_handler.file_dir(&self.language, &self.decomposed_file_name);
+        let dir_name = self
+            .file_handler
+            .file_dir(&self.language, &self.decomposed_file_name);
         if let Err(e) = fs::create_dir_all(dir_name) {
             return Err(LeetCodeHelperError::IoError(e));
         }
@@ -29,39 +31,44 @@ impl <'a> FileAllocator<'a> {
 
     /// move to appropriate folder
     fn move_file(&self) -> Result<(), LeetCodeHelperError> {
-
-        let dir_name = self.file_handler.file_dir(&self.language, &self.decomposed_file_name);
+        let dir_name = self
+            .file_handler
+            .file_dir(&self.language, &self.decomposed_file_name);
         if let Err(e) = fs::rename(
             self.decomposed_file_name.file_name().to_string(),
-            format!("{}/{}", dir_name, self.decomposed_file_name.file_name().to_string()),
+            format!(
+                "{}/{}",
+                dir_name,
+                self.decomposed_file_name.file_name().to_string()
+            ),
         ) {
             return Err(LeetCodeHelperError::IoError(e));
         }
         Ok(())
     }
-
 }
 
 /// generate a language handler
 pub fn language_handler(decomposed_file_name: &DecomposedFileName) -> Box<dyn LanguageHandler> {
-    let a = match decomposed_file_name.extension() {
+    match decomposed_file_name.extension() {
         String::from("rs") => Box::new(RustHandler),
-        _ => Box::new(GeneralHandler)
-    };
-
-    a
+        _ => Box::new(GeneralHandler),
+    }
 }
 
 trait LanguageHandler {
     /// determine file directory
     fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String;
+    ///
+    fn language_specific_process(&self) -> Result<(), LeetCodeHelperError> {
+        Ok(())
+    }
 }
 
 /// general language
 struct GeneralHandler;
 /// for Rust
 struct RustHandler;
-
 
 impl LanguageHandler for GeneralHandler {
     fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String {
@@ -74,7 +81,7 @@ impl LanguageHandler for GeneralHandler {
 }
 
 impl LanguageHandler for RustHandler {
-    fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String{
+    fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String {
         format!(
             "{}/src/bin/{}",
             file_name.extension().to_string(),
