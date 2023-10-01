@@ -32,6 +32,10 @@ impl DecomposedFileName {
         })
     }
 
+    pub(crate) fn problem_number(&self) -> String {
+        self.problem_number
+    }
+
     pub(crate) fn remove_extension(&self) -> String {
         format!("{}.{}", self.problem_number, self.problem_name)
     }

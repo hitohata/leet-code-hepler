@@ -8,4 +8,6 @@ pub enum LeetCodeHelperError {
     ExtensionMismatchError(String, String),
     #[error("IO error")]
     IoError(#[source] std::io::Error),
+    #[error("Toml error")]
+    TomlError(#[source] toml_edit::TomlError),
 }
