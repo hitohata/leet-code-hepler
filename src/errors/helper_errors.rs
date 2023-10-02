@@ -10,6 +10,4 @@ pub enum LeetCodeHelperError {
     IoError(#[source] std::io::Error),
     #[error("Toml error")]
     TomlError(#[source] toml_edit::TomlError),
-    #[error("reading file error")]
-    DirError(#[source] std::fs::ReadDir::Error),
 }
