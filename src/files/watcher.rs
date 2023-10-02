@@ -4,12 +4,10 @@ use std::fs::read_dir;
 
 use crate::errors::helper_errors::LeetCodeHelperError;
 use crate::files::file_name_decomposer::DecomposedFileName;
-use crate::languages::language_reader::LanguageAndExtension;
 
 /// reads the current directory and returns program files.
 pub fn programming_file_detector(
     path: &str,
-    languages: &LanguageAndExtension,
 ) -> Result<Vec<DecomposedFileName>, LeetCodeHelperError> {
     // read current directory files
     let dirs = match read_dir(path) {
@@ -17,15 +15,17 @@ pub fn programming_file_detector(
         Err(e) => return Err(LeetCodeHelperError::IoError(e)),
     };
 
-    let file_names: Vec<DecomposedFileName> = vec![];
+    let mut file_names: Vec<DecomposedFileName> = vec![];
 
     dirs.for_each(|f| {
         let file_entry = match f {
             Ok(entry) => entry,
-            Err(e) => return Err(LeetCodeHelperError::IoError(e)),
+            Err(_) => return,
         };
 
-        let file_name = match file_entry.file_name().to_str() {
+        let file_name_or_error = file_entry.file_name();
+
+        let file_name = match file_name_or_error.to_str() {
             Some(name) => name,
             None => return,
         };

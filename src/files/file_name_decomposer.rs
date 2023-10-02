@@ -14,7 +14,7 @@ impl DecomposedFileName {
     /// get a file as an argument. Its must be problem_number.problem_name.extension.
     /// This function decomposes it and create a structure.
     pub fn new(file_name: &str) -> Result<Self, LeetCodeHelperError> {
-        let mut splited_name = file_name.split(".").collect::<Vec<&str>>();
+        let splited_name = file_name.split(".").collect::<Vec<&str>>();
         let length = splited_name.len();
 
         if length < 3 {
@@ -33,7 +33,7 @@ impl DecomposedFileName {
     }
 
     pub(crate) fn problem_number(&self) -> String {
-        self.problem_number
+        self.problem_number.to_owned()
     }
 
     pub(crate) fn remove_extension(&self) -> String {

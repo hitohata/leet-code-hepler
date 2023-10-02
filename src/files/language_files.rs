@@ -33,7 +33,7 @@ struct RustHandler;
 impl LanguageHandler for GeneralHandler {
     fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String {
         format!(
-            "{}/src/{}",
+            "{}/{}",
             language_name,
             file_name.remove_extension().to_string()
         )
