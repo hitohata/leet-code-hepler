@@ -14,9 +14,7 @@ use std::sync::mpsc::channel;
 use cli::arguments::Cli;
 use files::file_allocator::FileAllocator;
 use files::file_name_decomposer::DecomposedFileName;
-use files::watcher::file_detector;
-use files::watcher::programming_file_detector;
-use files::watcher::watcher;
+use files::watcher::{file_detector, programming_file_detector, watcher};
 use languages::language_reader::LanguageAndExtension;
 
 fn main() {
@@ -35,9 +33,10 @@ fn main() {
         .iter()
         .for_each(|f| file_allocate(&languages, f));
 
+    // watch directory
     let (tx, rx) = channel();
 
-    let _ = watcher(&target_directory, tx);
+    let w = watcher(&target_directory, tx);
 
     for e in rx {
         if let Ok(file_name) = file_detector(e) {

@@ -5,7 +5,7 @@ use std::{fs::read_dir, sync::mpsc::Sender};
 
 use crate::errors::helper_errors::LeetCodeHelperError;
 use crate::files::file_name_decomposer::DecomposedFileName;
-use notify::{Config, Error, Event, RecommendedWatcher, RecursiveMode, Watcher};
+use notify::{Config, Error, Event, INotifyWatcher, RecommendedWatcher, RecursiveMode, Watcher};
 
 /// reads the current directory and returns program files.
 pub fn programming_file_detector(
@@ -41,7 +41,10 @@ pub fn programming_file_detector(
     Ok(file_names)
 }
 
-pub fn watcher(path: &str, tx: Sender<Result<Event, Error>>) -> Result<(), LeetCodeHelperError> {
+pub fn watcher(
+    path: &str,
+    tx: Sender<Result<Event, Error>>,
+) -> Result<INotifyWatcher, LeetCodeHelperError> {
     let config = Config::default();
 
     let mut watcher = match RecommendedWatcher::new(tx, config) {
@@ -53,7 +56,7 @@ pub fn watcher(path: &str, tx: Sender<Result<Event, Error>>) -> Result<(), LeetC
         return Err(LeetCodeHelperError::NotifyError(err));
     };
 
-    todo!()
+    Ok(watcher)
 }
 
 pub fn file_detector(e: Result<Event, Error>) -> Result<DecomposedFileName, LeetCodeHelperError> {
