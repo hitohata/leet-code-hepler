@@ -19,7 +19,7 @@ pub(crate) trait LanguageHandler {
     fn file_dir(&self, language_name: &str, file_name: &DecomposedFileName) -> String;
     fn language_specific_process(
         &self,
-        file_name: &DecomposedFileName,
+        _file_name: &DecomposedFileName,
     ) -> Result<(), LeetCodeHelperError> {
         Ok(())
     }
