@@ -8,6 +8,7 @@ mod cli;
 mod errors;
 mod files;
 mod languages;
+mod logging;
 
 use std::sync::mpsc::channel;
 
