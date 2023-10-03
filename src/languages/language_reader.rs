@@ -54,12 +54,19 @@ impl LanguageAndExtension {
         Self { extention_language }
     }
 
-    //
     fn open_language_file(file_path: &str) -> File {
         match File::open(file_path) {
             Ok(file) => file,
             Err(_) => panic!("Cannot find 'language.json' file. make sure you deploy it to project root directory.")
 
+        }
+    }
+
+    // return a language name if exists.
+    pub fn get_language_name(&self, extension: &str) -> Option<String> {
+        match self.extention_language.get(extension) {
+            Some(lang) => Some(lang.clone()),
+            None => None,
         }
     }
 }

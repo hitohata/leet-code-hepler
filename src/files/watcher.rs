@@ -1,9 +1,11 @@
 //! reads current directory, if the programming file detected, return.
 
-use std::fs::read_dir;
+use std::path::Path;
+use std::{fs::read_dir, sync::mpsc::Sender};
 
 use crate::errors::helper_errors::LeetCodeHelperError;
 use crate::files::file_name_decomposer::DecomposedFileName;
+use notify::{Config, Error, Event, RecommendedWatcher, RecursiveMode, Watcher};
 
 /// reads the current directory and returns program files.
 pub fn programming_file_detector(
@@ -37,4 +39,40 @@ pub fn programming_file_detector(
     });
 
     Ok(file_names)
+}
+
+pub fn watcher(path: &str, tx: Sender<Result<Event, Error>>) -> Result<(), LeetCodeHelperError> {
+    let config = Config::default();
+
+    let mut watcher = match RecommendedWatcher::new(tx, config) {
+        Ok(watcher) => watcher,
+        Err(e) => return Err(LeetCodeHelperError::NotifyError(e)),
+    };
+
+    if let Err(err) = watcher.watch(Path::new(path), RecursiveMode::NonRecursive) {
+        return Err(LeetCodeHelperError::NotifyError(err));
+    };
+
+    todo!()
+}
+
+pub fn file_detector(e: Result<Event, Error>) -> Result<DecomposedFileName, LeetCodeHelperError> {
+    let event = match e {
+        Ok(event) => event,
+        Err(err) => return Err(LeetCodeHelperError::NotifyError(err)),
+    };
+    let path = match event.paths[0].to_str() {
+        Some(path) => path,
+        None => return Err(LeetCodeHelperError::NotifyPathNotFound),
+    };
+
+    let file_name = match path.clone().split("/").last() {
+        Some(file_name) => file_name,
+        None => return Err(LeetCodeHelperError::NotifyPathNotFound),
+    };
+
+    match event.kind {
+        notify::EventKind::Create(_) => return DecomposedFileName::new(file_name),
+        _ => return Err(LeetCodeHelperError::NotifyKindNotMatch),
+    }
 }

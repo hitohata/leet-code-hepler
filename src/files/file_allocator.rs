@@ -21,7 +21,6 @@ impl<'a> FileAllocator<'a> {
     }
 
     /// move a file from the top directory to an appropriate folder.
-    ///
     pub fn allocate(&self) -> Result<(), LeetCodeHelperError> {
         let directory_name = self
             .file_handler

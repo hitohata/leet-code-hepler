@@ -6,8 +6,14 @@ pub enum LeetCodeHelperError {
     ProblemFileNameLengthError(usize),
     #[error("Extension error. required {0} provided {1}")]
     ExtensionMismatchError(String, String),
+    #[error("Notify path is not found")]
+    NotifyPathNotFound,
+    #[error("Notify kind not match")]
+    NotifyKindNotMatch,
     #[error("IO error")]
     IoError(#[source] std::io::Error),
     #[error("Toml error")]
     TomlError(#[source] toml_edit::TomlError),
+    #[error("Notify error")]
+    NotifyError(#[source] notify::Error),
 }

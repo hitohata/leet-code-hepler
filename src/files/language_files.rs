@@ -80,7 +80,7 @@ impl LanguageHandler for RustHandler {
             toml_doc["bin"] = Item::ArrayOfTables(new_array);
         }
         let updated = toml_doc.to_string();
-        std::fs::write(cargo_toml, updated);
+        let _ = std::fs::write(cargo_toml, updated);
         Ok(())
     }
 }
