@@ -26,11 +26,14 @@ impl LanguageAndExtension {
     ///     },
     /// ]
     /// ```
-    pub fn new() -> Self {
+    pub fn new(path: &Option<String>) -> Self {
         let file_name = if cfg!(test) {
             "./test_data/test_language.json"
         } else {
-            "language.json"
+            match &path {
+                Some(file) => file,
+                None => "language.json",
+            }
         };
 
         let mut extention_language: HashMap<String, String> = HashMap::new();
@@ -77,7 +80,7 @@ mod tests {
 
     #[test]
     fn language_extention_file_open() {
-        let lang_extention = LanguageAndExtension::new();
+        let lang_extention = LanguageAndExtension::new(&None);
         assert_eq!(lang_extention.extention_language.len(), 1);
 
         let first_one = &lang_extention.extention_language.get("rs");
