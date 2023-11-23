@@ -66,10 +66,10 @@ fn target_directory(directory: &Cli) -> String {
         Err(_) => panic!("directory not found"),
     };
 
-    let target_direcroy = match dir.to_str() {
+    let target_directory = match dir.to_str() {
         Some(d) => d,
         None => panic!("directory not found"),
     };
 
-    target_direcroy.to_string()
+    target_directory.to_string()
 }

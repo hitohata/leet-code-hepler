@@ -14,16 +14,16 @@ impl DecomposedFileName {
     /// get a file as an argument. Its must be problem_number.problem_name.extension.
     /// This function decomposes it and create a structure.
     pub fn new(file_name: &str) -> Result<Self, LeetCodeHelperError> {
-        let splited_name = file_name.split(".").collect::<Vec<&str>>();
-        let length = splited_name.len();
+        let split_name = file_name.split(".").collect::<Vec<&str>>();
+        let length = split_name.len();
 
         if length < 3 {
             return Err(LeetCodeHelperError::ProblemFileNameLengthError(length));
         };
 
-        let problem_number = splited_name.first().unwrap().to_string();
-        let extension = splited_name.last().unwrap().to_string();
-        let problem_name = splited_name[1..splited_name.len() - 1].join(".");
+        let problem_number = split_name.first().unwrap().to_string();
+        let extension = split_name.last().unwrap().to_string();
+        let problem_name = split_name[1..split_name.len() - 1].join(".");
 
         Ok(DecomposedFileName {
             problem_number,

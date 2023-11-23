@@ -44,12 +44,12 @@ impl<'a> FileAllocator<'a> {
     }
 
     /// move to appropriate folder
-    fn move_file(&self, direcrroy_name: &str) -> Result<(), LeetCodeHelperError> {
+    fn move_file(&self, directory_name: &str) -> Result<(), LeetCodeHelperError> {
         if let Err(e) = fs::rename(
             self.decomposed_file_name.file_name().to_string(),
             format!(
                 "{}/{}",
-                direcrroy_name,
+                directory_name,
                 self.decomposed_file_name.file_name().to_string()
             ),
         ) {
@@ -61,11 +61,11 @@ impl<'a> FileAllocator<'a> {
     /// add markdown file for taking notes.
     fn generate_markdown_file(
         &self,
-        direcrroy_name: &str,
+        directory_name: &str,
         file_name: &str,
     ) -> Result<(), LeetCodeHelperError> {
         let markdown_text = format!("# {}", file_name);
-        let path = format!("{}/{}.md", direcrroy_name, file_name);
+        let path = format!("{}/{}.md", directory_name, file_name);
         let _ = fs::write(path, markdown_text);
         Ok(())
     }

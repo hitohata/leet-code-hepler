@@ -74,8 +74,8 @@ pub fn file_detector(e: Result<Event, Error>) -> Result<DecomposedFileName, Leet
         None => return Err(LeetCodeHelperError::NotifyPathNotFound),
     };
 
-    match event.kind {
-        notify::EventKind::Create(_) => return DecomposedFileName::new(file_name),
-        _ => return Err(LeetCodeHelperError::NotifyKindNotMatch),
+    return match event.kind {
+        notify::EventKind::Create(_) => DecomposedFileName::new(file_name),
+        _ => Err(LeetCodeHelperError::NotifyKindNotMatch),
     }
 }

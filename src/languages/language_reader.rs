@@ -36,25 +36,25 @@ impl LanguageAndExtension {
             }
         };
 
-        let mut extention_language: HashMap<String, String> = HashMap::new();
+        let mut extension_language: HashMap<String, String> = HashMap::new();
 
         let file = Self::open_language_file(file_name);
         let buf_reader = BufReader::new(file);
 
-        let language_and_exetention_json: Vec<LanguageAndExtensionJson> =
+        let language_and_exetension_json: Vec<LanguageAndExtensionJson> =
             match serde_json::from_reader(buf_reader) {
                 Ok(data) => data,
                 Err(_) => panic!("reading the language.json error."),
             };
 
-        language_and_exetention_json.iter().for_each(|lang_ex| {
-            extention_language.insert(
+        language_and_exetension_json.iter().for_each(|lang_ex| {
+            extension_language.insert(
                 lang_ex.languageExtension.clone(),
                 lang_ex.languageName.clone(),
             );
         });
 
-        Self { extention_language }
+        Self { extention_language: extension_language }
     }
 
     fn open_language_file(file_path: &str) -> File {
@@ -79,11 +79,11 @@ mod tests {
     use super::*;
 
     #[test]
-    fn language_extention_file_open() {
-        let lang_extention = LanguageAndExtension::new(&None);
-        assert_eq!(lang_extention.extention_language.len(), 1);
+    fn language_extension_file_open() {
+        let lang_extension = LanguageAndExtension::new(&None);
+        assert_eq!(lang_extension.extention_language.len(), 1);
 
-        let first_one = &lang_extention.extention_language.get("rs");
+        let first_one = &lang_extension.extention_language.get("rs");
         assert!(first_one.is_some());
         assert_eq!(first_one.unwrap(), "rust");
     }
